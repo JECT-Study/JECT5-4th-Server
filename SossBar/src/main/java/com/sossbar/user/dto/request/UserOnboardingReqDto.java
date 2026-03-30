@@ -3,7 +3,7 @@ package com.sossbar.user.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record UserInfoSaveReqDto(
+public record UserOnboardingReqDto(
         @NotBlank
         @Size(min = 2, max = 10, message = "이름은 2자 이상 10자 이하로 입력해 주세요.")
         String username,
