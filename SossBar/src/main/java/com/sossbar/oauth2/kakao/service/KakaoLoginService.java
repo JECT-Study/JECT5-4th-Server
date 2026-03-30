@@ -93,22 +93,22 @@ public class KakaoLoginService {
         String accessToken = getKakaoAccessToken(code);
         KakaoUserInfo kakaoUserInfo = getUserInfoFromKakao(accessToken);
 
-        if (kakaoUserInfo.getKakao_account() == null ||
-                kakaoUserInfo.getKakao_account().getEmail() == null) {
+        if (kakaoUserInfo.getKakaoAccount() == null ||
+                kakaoUserInfo.getKakaoAccount().getEmail() == null) {
             throw new BusinessException(ErrorCode.KAKAO_EMAIL_NOT_FOUND,
                     ErrorCode.KAKAO_EMAIL_NOT_FOUND.getMessage());
         }
 
         User user = userRepository.findByEmail(
-                kakaoUserInfo.getKakao_account().getEmail()
+                kakaoUserInfo.getKakaoAccount().getEmail()
         ).orElseGet(() ->
                 userRepository.save(User.builder()
-                        .email(kakaoUserInfo.getKakao_account().getEmail())
+                        .email(kakaoUserInfo.getKakaoAccount().getEmail())
                         .nickname(kakaoUserInfo.getProperties().getNickname())
                         .profileImageUrl(
-                                kakaoUserInfo.getKakao_account()
+                                kakaoUserInfo.getKakaoAccount()
                                         .getProfile()
-                                        .getProfile_image_url()
+                                        .getProfileImageUrl()
                         )
                         .userType(UserType.KAKAO)
                         .build())

@@ -1,11 +1,13 @@
 package com.sossbar.oauth2.kakao.dto;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 @Data
 public class KakaoUserInfo {
     private Long id;
-    private KakaoAccount kakao_account;
+    @SerializedName("kakao_account")
+    private KakaoAccount kakaoAccount;
     private Properties properties;
 
     @Data
@@ -15,7 +17,8 @@ public class KakaoUserInfo {
 
         @Data
         public static class Profile {
-            private String profile_image_url;
+            @SerializedName("profile_image_url")
+            private String profileImageUrl;
         }
     }
 

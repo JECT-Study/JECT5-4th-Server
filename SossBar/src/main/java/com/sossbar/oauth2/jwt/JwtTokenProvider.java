@@ -87,7 +87,10 @@ public class JwtTokenProvider {
     public Authentication getAuthentication(String token) {
         Claims claims = parseClaims(token);
         Long userId = Long.parseLong(claims.getSubject());
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION
+                        , ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage())
+        );
 
         List<GrantedAuthority> authorities = List.of(
                 new SimpleGrantedAuthority(user.getUserType().toString())
