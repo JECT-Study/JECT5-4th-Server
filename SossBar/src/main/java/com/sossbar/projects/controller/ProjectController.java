@@ -2,11 +2,13 @@ package com.sossbar.projects.controller;
 
 import com.sossbar.global.common.code.SuccessCode;
 import com.sossbar.global.common.template.ApiResTemplate;
+import com.sossbar.global.common.template.SwaggerApiResTemplate;
 import com.sossbar.projects.dto.request.ProjectCreateRequest;
 import com.sossbar.projects.dto.request.ProjectUpdateRequest;
 import com.sossbar.projects.dto.response.ProjectResponse;
 import com.sossbar.projects.facade.ProjectFacade;
 import com.sossbar.projects.service.ProjectService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -16,12 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
+@SwaggerApiResTemplate
 public class ProjectController {
 
     private final ProjectFacade projectFacade;
     private final ProjectService projectService;
 
-    // 새 프로젝트 생성 - POST /api/v1/projects
+    @Operation(summary = "프로젝트 생성", description = "새 프로젝트를 생성하는 API입니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResTemplate<ProjectResponse> createProject(
             @RequestPart("request") @Valid ProjectCreateRequest request,
@@ -30,8 +33,7 @@ public class ProjectController {
         return ApiResTemplate.successResponse(SuccessCode.CREATE_SUCCESS, projectFacade.createProject(request, image));
     }
 
-    // 프로젝트 개별 조회 - GET /api/v1/projects/{projectId}
-    // S3 작업 없으므로 Facade 거치지 않고 Service 직접 호출
+    @Operation(summary = "프로젝트 조회", description = "프로젝트 ID로 단일 프로젝트를 조회하는 API입니다.")
     @GetMapping("/{projectId}")
     public ApiResTemplate<ProjectResponse> getProject(
             @PathVariable Long projectId
@@ -39,7 +41,7 @@ public class ProjectController {
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getProject(projectId));
     }
 
-    // 프로젝트 수정 - PATCH /api/v1/projects/{projectId}
+    @Operation(summary = "프로젝트 수정", description = "프로젝트 정보를 수정하는 API입니다.")
     @PatchMapping(value = "/{projectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResTemplate<ProjectResponse> updateProject(
             @PathVariable Long projectId,
@@ -49,7 +51,7 @@ public class ProjectController {
         return ApiResTemplate.successResponse(SuccessCode.UPDATE_SUCCESS, projectFacade.updateProject(projectId, request, image));
     }
 
-    // 프로젝트 삭제 - DELETE /api/v1/projects/{projectId}
+    @Operation(summary = "프로젝트 삭제", description = "프로젝트를 삭제하는 API입니다.")
     @DeleteMapping("/{projectId}")
     public ApiResTemplate<Void> deleteProject(
             @PathVariable Long projectId
