@@ -23,6 +23,9 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    @Value("${cloud.aws.s3.url}")
+    private String baseUrl;
+
     // 파일 크기 제한 (5MB)
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -90,10 +93,7 @@ public class S3Service {
 
     // 파일 이름 추출
     public String extractFileName(String fileUrl) {
-        String key = fileUrl.replace(
-                "https://sossbar-bucket.s3.ap-northeast-2.amazonaws.com/",
-                ""
-        );
+        String key = fileUrl.replace(baseUrl + "/", "");
         return URLDecoder.decode(key, StandardCharsets.UTF_8);
     }
 }
