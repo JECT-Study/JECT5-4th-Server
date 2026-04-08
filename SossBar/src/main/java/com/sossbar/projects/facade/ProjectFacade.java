@@ -1,46 +1,84 @@
 package com.sossbar.projects.facade;
 
+import com.sossbar.global.common.code.ErrorCode;
+import com.sossbar.global.common.exception.BusinessException;
+import com.sossbar.global.config.S3Service;
 import com.sossbar.projects.dto.request.ProjectCreateRequest;
 import com.sossbar.projects.dto.request.ProjectUpdateRequest;
 import com.sossbar.projects.dto.response.ProjectResponse;
 import com.sossbar.projects.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectFacade {
 
     private final ProjectService projectService;
-    // TODO: private final S3Uploader s3Uploader;
+    private final S3Service s3Service;
 
-    // @Transactional 없음 - S3와 DB 작업 순서를 여기서 조율
+    private static final String S3_DIR = "project";
+
     public ProjectResponse createProject(ProjectCreateRequest request, MultipartFile image) {
-        // 1. [트랜잭션 밖] 이미지가 존재하면 S3에 업로드 후 imageUrl 반환, 없으면 null
-        //    - 업로드 실패 시 예외를 던져 이후 로직 진행 차단
-        // 2. [트랜잭션 안] projectService.createProject(request, imageUrl) 호출하여 DB 저장
-        //    - DB 저장 실패 시 예외 발생 → catch에서 S3에 업로드된 이미지 보상 삭제 후 예외 rethrow
-        // 3. ProjectResponse 반환
-        throw new UnsupportedOperationException("구현 예정");
+        // 1. 이미지가 있으면 S3 업로드
+        String imageUrl = null;
+        if (image != null && !image.isEmpty()) {
+            imageUrl = s3Service.uploadFile(image, S3_DIR);
+        }
+
+        // 2. DB 저장 - 실패 시 S3 보상 삭제
+        try {
+            return projectService.createProject(request, imageUrl);
+        } catch (Exception e) {
+            log.error("[ProjectFacade] {} {}", ErrorCode.PROJECT_CREATE_ROLLBACK_EXCEPTION.getMessage(), imageUrl, e);
+            s3Service.deleteFile(imageUrl);
+            throw new BusinessException(
+                    ErrorCode.PROJECT_CREATE_ROLLBACK_EXCEPTION,
+                    ErrorCode.PROJECT_CREATE_ROLLBACK_EXCEPTION.getMessage() + imageUrl);
+        }
     }
 
     public ProjectResponse updateProject(Long projectId, ProjectUpdateRequest request, MultipartFile image) {
-        // 1. [트랜잭션 밖] 새 이미지가 존재하면 S3에 새 이미지 업로드 후 newImageUrl 반환
-        //    - 업로드 실패 시 예외를 던져 이후 로직 진행 차단 (기존 이미지 유지)
-        // 2. [트랜잭션 안] projectService.updateProject(projectId, request, newImageUrl) 호출하여 DB 수정
-        //    - DB 수정 실패 시 예외 발생 → catch에서 새로 업로드한 S3 이미지 보상 삭제 후 예외 rethrow
-        // 3. [트랜잭션 밖] DB 수정 성공 후 기존 S3 이미지 삭제
-        //    - 기존 이미지 url은 projectService.getProjectImageUrl()로 미리 조회해둬야 함
-        // 4. ProjectResponse 반환
-        throw new UnsupportedOperationException("구현 예정");
+        // 1. 기존 이미지 URL 미리 조회 (DB 수정 성공 후 기존 S3 이미지 삭제에 사용)
+        String oldImageUrl = projectService.getProjectImageUrl(projectId);
+
+        // 2. 새 이미지가 있으면 S3 업로드
+        String newImageUrl = null;
+        if (image != null && !image.isEmpty()) {
+            newImageUrl = s3Service.uploadFile(image, S3_DIR);
+        }
+
+        // 3. DB 수정 - 실패 시 새로 올린 S3 이미지 보상 삭제
+        ProjectResponse response;
+        try {
+            response = projectService.updateProject(projectId, request, newImageUrl);
+        } catch (Exception e) {
+            log.error("[ProjectFacade] {} {}", ErrorCode.PROJECT_UPDATE_ROLLBACK_EXCEPTION.getMessage(), newImageUrl, e);
+            s3Service.deleteFile(newImageUrl);
+            throw new BusinessException(
+                    ErrorCode.PROJECT_UPDATE_ROLLBACK_EXCEPTION,
+                    ErrorCode.PROJECT_UPDATE_ROLLBACK_EXCEPTION.getMessage() + newImageUrl);
+        }
+
+        // 4. DB 수정 성공 후 기존 S3 이미지 삭제 (새 이미지가 있을 때만)
+        if (newImageUrl != null) {
+            s3Service.deleteFile(oldImageUrl);
+        }
+
+        return response;
     }
 
     public void deleteProject(Long projectId) {
-        // 1. [트랜잭션 밖] 삭제할 이미지 url을 projectService.getProjectImageUrl()로 미리 조회
-        // 2. [트랜잭션 안] projectService.deleteProject(projectId) 호출하여 DB 삭제
-        //    - DB 삭제 실패 시 예외 발생 → S3 삭제 진행하지 않음 (이미지 보존)
-        // 3. [트랜잭션 밖] DB 삭제 성공 후 S3 이미지 삭제
-        throw new UnsupportedOperationException("구현 예정");
+        // 1. 삭제할 이미지 URL 미리 조회
+        String imageUrl = projectService.getProjectImageUrl(projectId);
+
+        // 2. DB 삭제 - 실패 시 예외 그대로 throw (S3 삭제하지 않음)
+        projectService.deleteProject(projectId);
+
+        // 3. DB 삭제 성공 후 S3 이미지 삭제
+        s3Service.deleteFile(imageUrl);
     }
 }

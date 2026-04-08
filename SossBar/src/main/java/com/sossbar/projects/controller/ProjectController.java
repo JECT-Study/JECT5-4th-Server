@@ -9,6 +9,7 @@ import com.sossbar.projects.dto.response.ProjectResponse;
 import com.sossbar.projects.facade.ProjectFacade;
 import com.sossbar.projects.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
 @SwaggerApiResTemplate
+@Tag(name = "Project API", description = "프로젝트 관련 API")
 public class ProjectController {
 
     private final ProjectFacade projectFacade;

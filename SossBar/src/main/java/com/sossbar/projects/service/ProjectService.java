@@ -1,12 +1,18 @@
 package com.sossbar.projects.service;
 
+import com.sossbar.global.common.code.ErrorCode;
+import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.projects.dto.request.ProjectCreateRequest;
 import com.sossbar.projects.dto.request.ProjectUpdateRequest;
 import com.sossbar.projects.dto.response.ProjectResponse;
+import com.sossbar.projects.entity.Project;
+import com.sossbar.projects.enums.ProjectStatus;
 import com.sossbar.projects.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -17,41 +23,64 @@ public class ProjectService {
 
     @Transactional
     public ProjectResponse createProject(ProjectCreateRequest request, String imageUrl) {
-        // 1. request + imageUrl + 초기 projectStatus(IN_PROGRESS) + 랜덤 uuid로 projectLink 생성하여 Project 엔티티 빌드
-        // 2. projectRepository.save()로 저장
-        // 3. 저장된 Project를 ProjectResponse로 변환하여 반환
-        throw new UnsupportedOperationException("구현 예정");
+        String projectLink = UUID.randomUUID().toString();
+
+        Project project = Project.builder()
+                .projectName(request.getProjectName())
+                .host(request.getHost())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .projectLink(projectLink)
+                .projectImage(imageUrl)
+                .projectStatus(ProjectStatus.IN_PROGRESS)
+                .build();
+
+        return toResponse(projectRepository.save(project));
     }
 
+    @Transactional(readOnly = true)
     public ProjectResponse getProject(Long projectId) {
-        // 1. projectRepository.findById(projectId)로 조회
-        // 2. 없으면 커스텀 예외 던지기 (ex. ProjectNotFoundException)
-        // 3. 조회된 Project를 ProjectResponse로 변환하여 반환
-        throw new UnsupportedOperationException("구현 예정");
+        return toResponse(findProjectById(projectId));
     }
 
     @Transactional
     public ProjectResponse updateProject(Long projectId, ProjectUpdateRequest request, String newImageUrl) {
-        // 1. projectRepository.findById(projectId)로 조회
-        // 2. 없으면 커스텀 예외 던지기 (ex. ProjectNotFoundException)
-        // 3. project.update()로 변경 (Dirty Checking으로 커밋 시 자동 반영)
-        // 4. 수정된 Project를 ProjectResponse로 변환하여 반환
-        throw new UnsupportedOperationException("구현 예정");
+        Project project = findProjectById(projectId);
+        project.update(request.getProjectName(), request.getHost(),
+                request.getStartDate(), request.getEndDate(), newImageUrl);
+        return toResponse(project);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public String getProjectImageUrl(Long projectId) {
-        // 1. projectRepository.findById(projectId)로 조회
-        // 2. 없으면 커스텀 예외 던지기 (ex. ProjectNotFoundException)
-        // 3. 기존 projectImage url 반환 (Facade에서 S3 삭제 시 사용)
-        throw new UnsupportedOperationException("구현 예정");
+        return findProjectById(projectId).getProjectImage();
     }
 
     @Transactional
     public void deleteProject(Long projectId) {
-        // 1. projectRepository.findById(projectId)로 조회
-        // 2. 없으면 커스텀 예외 던지기 (ex. ProjectNotFoundException)
-        // 3. projectRepository.delete()로 DB에서 삭제
-        throw new UnsupportedOperationException("구현 예정");
+        Project project = findProjectById(projectId);
+        projectRepository.delete(project);
+    }
+
+    // 공통 조회 메서드
+    private Project findProjectById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
+    }
+
+    // Project -> ProjectResponse 변환
+    private ProjectResponse toResponse(Project project) {
+        return ProjectResponse.builder()
+                .projectId(project.getProjectId())
+                .projectName(project.getProjectName())
+                .host(project.getHost())
+                .startDate(project.getStartDate())
+                .endDate(project.getEndDate())
+                .projectLink(project.getProjectLink())
+                .projectImage(project.getProjectImage())
+                .projectStatus(project.getProjectStatus())
+                .build();
     }
 }
