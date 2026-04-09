@@ -5,6 +5,8 @@ import com.sossbar.projects.enums.ProjectStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "project")
 @Getter
@@ -31,17 +33,17 @@ public class Project extends BaseTimeEntity {
     private String projectImage;         // 이미지 (S3 url)
 
     @Column(name = "start_date")
-    private String startDate;            // 프로젝트 시작 날짜
+    private LocalDateTime startDate;     // 프로젝트 시작 날짜
 
     @Column(name = "end_date")
-    private String endDate;              // 프로젝트 종료 날짜
+    private LocalDateTime endDate;       // 프로젝트 종료 날짜
 
     @Enumerated(EnumType.STRING)
     @Column(name = "project_status", nullable = false)
     private ProjectStatus projectStatus; // 프로젝트 진행 상황
 
     // 프로젝트 수정 메서드
-    public void update(String projectName, String host, String startDate, String endDate, String projectImage) {
+    public void update(String projectName, String host, LocalDateTime startDate, LocalDateTime endDate, String projectImage) {
         if (projectName != null) this.projectName = projectName;
         if (host != null) this.host = host;
         if (startDate != null) this.startDate = startDate;
