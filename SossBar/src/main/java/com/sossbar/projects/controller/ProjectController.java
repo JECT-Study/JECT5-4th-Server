@@ -41,7 +41,7 @@ public class ProjectController {
     @Operation(summary = "프로젝트 조회", description = "프로젝트 ID로 단일 프로젝트를 조회하는 API입니다.")
     @GetMapping("/{projectId}")
     public ApiResTemplate<ProjectResponse> getProject(
-            @PathVariable Long projectId
+            @PathVariable("projectId") Long projectId
     ) {
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getProject(projectId));
     }
@@ -49,7 +49,7 @@ public class ProjectController {
     @Operation(summary = "프로젝트 수정", description = "프로젝트 정보를 수정하는 API입니다.")
     @PatchMapping(value = "/{projectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResTemplate<ProjectResponse> updateProject(
-            @PathVariable Long projectId,
+            @PathVariable("projectId") Long projectId,
             @RequestPart("request") @Valid ProjectUpdateRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) {
@@ -59,7 +59,7 @@ public class ProjectController {
     @Operation(summary = "프로젝트 삭제", description = "프로젝트를 삭제하는 API입니다.")
     @DeleteMapping("/{projectId}")
     public ApiResTemplate<Void> deleteProject(
-            @PathVariable Long projectId
+            @PathVariable("projectId") Long projectId
     ) {
         projectFacade.deleteProject(projectId);
         return ApiResTemplate.successWithNoContent(SuccessCode.DELETE_SUCCESS);
