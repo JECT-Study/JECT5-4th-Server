@@ -27,8 +27,19 @@ public enum ErrorCode {
     KAKAO_EMAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "카카오 계정에 이메일이 없습니다.", "AUTH-005"),
     KAKAO_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "카카오 로그인에 실패했습니다.", "AUTH-006"),
 
+    // IMAGE FILE
+    FILE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "파일이 없습니다.", "FILE-001"),
+    FILE_UPLOAD_FAIL_EXCEPTION(HttpStatus.BAD_GATEWAY, "파일 업로드에 실패하였습니다.", "FILE-002"),
+    FILE_SIZE_EXCEEDED_EXCEPTION(HttpStatus.BAD_GATEWAY, "파일 크기가 너무 큽니다. (최대 5MB)", "FILE-003"),
+    INVALID_FILE_TYPE_EXCEPTION(HttpStatus.BAD_REQUEST, "지원하지 않는 파일 형식입니다. (jpg, jpeg, png, gif만 허용)", "FILE-004"),
+
     // USER
-    USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 사용자가 없습니다. userId = ", "USER-001");
+    USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 사용자가 없습니다. userId = ", "USER-001"),
+
+    // PROJECT
+    PROJECT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 프로젝트가 없습니다. projectId = ", "PROJECT-001"),
+    PROJECT_CREATE_ROLLBACK_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "프로젝트 생성 중 DB 오류가 발생하여 업로드된 이미지를 롤백했습니다. imageUrl = ", "PROJECT-002"),
+    PROJECT_UPDATE_ROLLBACK_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "프로젝트 수정 중 DB 오류가 발생하여 업로드된 이미지를 롤백했습니다. imageUrl = ", "PROJECT-003");
 
     private final HttpStatus httpStatus;
     private final String message;
