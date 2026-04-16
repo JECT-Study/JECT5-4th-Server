@@ -4,6 +4,7 @@ import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
 import com.sossbar.review.dto.request.ReviewReqDto;
+import com.sossbar.review.dto.request.SpectrumReqDto;
 import com.sossbar.review.entity.Review;
 import com.sossbar.review.entity.ReviewSpectrum;
 import com.sossbar.review.entity.ReviewTag;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,17 +82,27 @@ public class ReviewService {
         }
 
         // 각 스펙트럼 축 당 저장하기
-        List<ReviewSpectrum> reviewSpectrums = reviewCreateReqDto.getSpectrumReqDtos().stream()
-                .map(spectrumReqDto -> {
-                    SpectrumAxis spectrumAxis = spectrumAxisRepository.findById(spectrumReqDto.getSpectrumAxisId()).orElseThrow(() -> new RuntimeException("해당 스펙트럼은 존재하지 않습니다: " + spectrumReqDto.getSpectrumAxisId()));
-
-                    return ReviewSpectrum.builder()
-                            .review(savedReview)
-                            .spectrumAxis(spectrumAxis)
-                            .strength(spectrumReqDto.getSpectrumStrength())
-                            .build();
-                        })
+        List<Long> spectrumAxisIds = reviewCreateReqDto.getSpectrumReqDtos().stream()
+                .map(SpectrumReqDto::getSpectrumAxisId)
+                .distinct()
                 .collect(Collectors.toList());
+
+        List<SpectrumAxis> spectrumAxes = spectrumAxisRepository.findAllById(spectrumAxisIds);
+
+        Map<Long, SpectrumAxis> spectrumAxisMap = spectrumAxes.stream()
+                        .collect(Collectors.toMap(SpectrumAxis::getSpectrumAxisId, axis -> axis));
+
+        if(spectrumAxisMap.size() != spectrumAxes.size()) {
+            throw new RuntimeException("일부 스펙트럼이 존재하지 않습니다.");
+        }
+
+        List<ReviewSpectrum> reviewSpectrums = reviewCreateReqDto.getSpectrumReqDtos().stream()
+                        .map(dto -> ReviewSpectrum.builder()
+                                .review(savedReview)
+                                .spectrumAxis(spectrumAxisMap.get(dto.getSpectrumAxisId()))
+                                .strength(dto.getSpectrumStrength())
+                                .build())
+                        .collect(Collectors.toList());
 
         reviewSpectrumRepository.saveAll(reviewSpectrums);
     }
