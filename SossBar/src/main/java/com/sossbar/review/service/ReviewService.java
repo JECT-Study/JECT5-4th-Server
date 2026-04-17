@@ -42,7 +42,13 @@ public class ReviewService {
     public void createReview(Principal principal, ReviewCreateReqDto reviewCreateReqDto) {
         ReviewReqDto reviewReqDto = reviewCreateReqDto.getReviewReqDto();
 
-        Long reviewerIdentifier = Long.parseLong(principal.getName());
+        Long reviewerIdentifier;
+
+        try {
+            reviewerIdentifier = Long.parseLong(principal.getName());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(e);
+        }
 
         User reviewer = userRepository.findById(reviewerIdentifier)
                 .orElseThrow(() -> new RuntimeException("해당 유저는 존재하지 않습니다: " + reviewerIdentifier));
