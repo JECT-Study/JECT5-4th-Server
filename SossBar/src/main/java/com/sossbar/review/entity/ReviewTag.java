@@ -3,15 +3,13 @@ package com.sossbar.review.entity;
 import com.sossbar.tag.entity.Tag;
 import com.sossbar.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Getter
 public class ReviewTag {
 
     @Id

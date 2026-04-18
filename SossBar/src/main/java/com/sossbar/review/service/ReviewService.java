@@ -5,6 +5,7 @@ import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
 import com.sossbar.review.dto.request.ReviewReqDto;
 import com.sossbar.review.dto.request.SpectrumReqDto;
+import com.sossbar.review.dto.response.ReviewCreateResDto;
 import com.sossbar.review.entity.Review;
 import com.sossbar.review.entity.ReviewSpectrum;
 import com.sossbar.review.entity.ReviewTag;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,10 +41,11 @@ public class ReviewService {
     private final ProjectRepository projectRepository;
 
     @Transactional
-    public void createReview(Principal principal, ReviewCreateReqDto reviewCreateReqDto) {
+    public ReviewCreateResDto createReview(Principal principal, ReviewCreateReqDto reviewCreateReqDto) {
         ReviewReqDto reviewReqDto = reviewCreateReqDto.getReviewReqDto();
+        List<ReviewTag> reviewTags = new ArrayList<>();
 
-        Long reviewerIdentifier;
+        long reviewerIdentifier;
 
         try {
             reviewerIdentifier = Long.parseLong(principal.getName());
@@ -77,7 +80,7 @@ public class ReviewService {
                 throw new RuntimeException("일부 태그가 존재하지 않습니다.");
             }
 
-            List<ReviewTag> reviewTags = tags.stream()
+            reviewTags = tags.stream()
                     .map(tag -> ReviewTag.builder()
                             .review(savedReview)
                             .tag(tag)
@@ -111,5 +114,7 @@ public class ReviewService {
                         .collect(Collectors.toList());
 
         reviewSpectrumRepository.saveAll(reviewSpectrums);
+
+        return ReviewCreateResDto.from(savedReview, reviewTags, reviewSpectrums);
     }
 }
