@@ -1,5 +1,7 @@
 package com.sossbar.review.service;
 
+import com.sossbar.global.common.code.ErrorCode;
+import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
@@ -54,20 +56,20 @@ public class ReviewService {
         }
 
         User reviewer = userRepository.findById(reviewerIdentifier)
-                .orElseThrow(() -> new RuntimeException("해당 유저는 존재하지 않습니다: " + reviewerIdentifier));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION, reviewerIdentifier+""));
         User reviewee = userRepository.findById(reviewReqDto.getRevieweeId())
-                .orElseThrow(() -> new RuntimeException("해당 유저는 존재하지 않습니다: " + reviewReqDto.getRevieweeId()));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION, reviewerIdentifier+""));
 
         if (reviewRepository.existsByReviewerAndReviewee(reviewer, reviewee)) {
-            throw new IllegalStateException("이미 해당 유저에게 후기를 남긴 적이 있습니다.");
+            throw new BusinessException(ErrorCode.DUPLICATE_REVIEW_EXCEPTION, reviewee.getId()+"");
         }
 
         if (reviewer.getId().equals(reviewee.getId())) {
-            throw new IllegalStateException("자기 자신에게 후기를 남길 수 없습니다.");
+            throw new BusinessException(ErrorCode.SELF_REVIEW_NOT_ALLOWED, "");
         }
 
         Project project = projectRepository.findById(reviewReqDto.getProjectId())
-                .orElseThrow(() -> new RuntimeException("해당 프로젝트는 존재하지 않습니다: " + reviewReqDto.getProjectId()));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND_EXCEPTION, reviewReqDto.getProjectId()+""));
 
         Review savedReview = reviewRepository.save(reviewReqDto.toEntity(reviewer, reviewee, project));
 
@@ -77,7 +79,7 @@ public class ReviewService {
             List<Tag> tags = tagRepository.findAllById(tagIds);
 
             if(tags.size() != tagIds.size()) {
-                throw new RuntimeException("일부 태그가 존재하지 않습니다.");
+                throw new BusinessException(ErrorCode.TAG_NOT_FOUND, "");
             }
 
             reviewTags = tags.stream()
@@ -102,7 +104,7 @@ public class ReviewService {
                         .collect(Collectors.toMap(SpectrumAxis::getSpectrumAxisId, axis -> axis));
 
         if(spectrumAxisMap.size() != spectrumAxes.size()) {
-            throw new RuntimeException("일부 스펙트럼이 존재하지 않습니다.");
+            throw new BusinessException(ErrorCode.SPECTRUM_NOT_FOUND, "");
         }
 
         List<ReviewSpectrum> reviewSpectrums = reviewCreateReqDto.getSpectrumReqDtos().stream()
