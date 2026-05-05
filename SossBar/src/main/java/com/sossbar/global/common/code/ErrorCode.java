@@ -26,6 +26,7 @@ public enum ErrorCode {
     KAKAO_USER_INFO_FAILED(HttpStatus.BAD_GATEWAY, "카카오 사용자 정보 조회 실패", "AUTH-004"),
     KAKAO_EMAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "카카오 계정에 이메일이 없습니다.", "AUTH-005"),
     KAKAO_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "카카오 로그인에 실패했습니다.", "AUTH-006"),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다.", "AUTH-007"),
 
     // IMAGE FILE
     FILE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "파일이 없습니다.", "FILE-001"),
@@ -39,7 +40,13 @@ public enum ErrorCode {
     // PROJECT
     PROJECT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 프로젝트가 없습니다. projectId = ", "PROJECT-001"),
     PROJECT_CREATE_ROLLBACK_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "프로젝트 생성 중 DB 오류가 발생하여 업로드된 이미지를 롤백했습니다. imageUrl = ", "PROJECT-002"),
-    PROJECT_UPDATE_ROLLBACK_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "프로젝트 수정 중 DB 오류가 발생하여 업로드된 이미지를 롤백했습니다. imageUrl = ", "PROJECT-003");
+    PROJECT_UPDATE_ROLLBACK_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "프로젝트 수정 중 DB 오류가 발생하여 업로드된 이미지를 롤백했습니다. imageUrl = ", "PROJECT-003"),
+
+    // REVIEW
+    DUPLICATE_REVIEW_EXCEPTION(HttpStatus.CONFLICT,"이미 해당 사용자에게 후기를 남겼습니다. revieweeId = ","REVIEW-001"),
+    SELF_REVIEW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신에게 후기를 남길 수 없습니다.", "REVIEW-002"),
+    TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "일부 태그가 존재하지 않습니다.", "REVIEW-003"),
+    SPECTRUM_NOT_FOUND(HttpStatus.NOT_FOUND, "일부 스펙트럼이 존재하지 않습니다.", "REVIEW-004");
 
     private final HttpStatus httpStatus;
     private final String message;
