@@ -59,7 +59,7 @@ public class UserService {
 
     @Transactional
     // 마이페이지 - 내 닉네임 수정
-    public UserInfoResDto updateUserNickname(Principal principal, @Valid UserNameUpdateReqDto userNameUpdateReqDto) {
+    public UserInfoResDto updateUserNickname(Principal principal, UserNameUpdateReqDto userNameUpdateReqDto) {
         Long id = Long.parseLong(principal.getName());
         User user = getUserById(id);
 
