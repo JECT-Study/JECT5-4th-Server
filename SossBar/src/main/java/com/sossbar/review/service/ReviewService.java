@@ -124,11 +124,11 @@ public class ReviewService {
     }
 
     public List<CommonReviewResDto> getReviews(Principal principal, Long userId) {
-        Long loginUserId = Long.parseLong(principal.getName());
+        Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
         List<Review> reviews = reviewRepository.findAllByRevieweeId(userId);
 
         // 내가 내 전체 후기 조회
-        if(loginUserId.equals(userId)) {
+        if(userId.equals(loginUserId)) {
             return reviews.stream()
                     .map(review -> (CommonReviewResDto) ReviewPrivateResDto.from(review))
                     .toList();

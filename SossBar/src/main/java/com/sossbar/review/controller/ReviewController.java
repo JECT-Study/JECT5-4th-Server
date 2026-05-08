@@ -39,8 +39,8 @@ public class ReviewController {
             Principal principal,
             @PathVariable Long userId
     ) {
-        List<CommonReviewResDto> Reviews = reviewService.getReviews(principal, userId);
-        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, reviewService.getReviews(principal, userId));
+        List<CommonReviewResDto> reviews = reviewService.getReviews(principal, userId);
+        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, reviews);
     }
 
 }

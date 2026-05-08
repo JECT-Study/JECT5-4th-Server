@@ -20,7 +20,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         SELECT r 
         FROM Review r
         JOIN FETCH r.project 
-        WHERE r.reviewee.Id = :userId
+        WHERE r.reviewee.id = :userId
         ORDER BY r.project.createdAt DESC
         """)
     List<Review> findAllByRevieweeId(@Param("userId") Long userId);

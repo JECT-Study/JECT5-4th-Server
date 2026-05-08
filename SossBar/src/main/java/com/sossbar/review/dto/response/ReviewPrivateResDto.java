@@ -5,12 +5,12 @@ import lombok.Builder;
 
 // 내 프로필 전체 후기 조회
 @Builder
-public record ReviewPrivateResDto (
-        String projectName,
-        String host,
-        String positiveFeedback,
-        String negativeFeedback
-) implements CommonReviewResDto {
+public class ReviewPrivateResDto extends CommonReviewResDto {
+    private String projectName;
+    private String host;
+    private String positiveFeedback;
+    private String negativeFeedback;
+
     public static ReviewPrivateResDto from(Review review) {
         return ReviewPrivateResDto.builder()
                 .projectName(review.getProject().getProjectName())
