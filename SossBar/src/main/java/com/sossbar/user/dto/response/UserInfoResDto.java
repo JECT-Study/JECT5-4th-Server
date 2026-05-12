@@ -8,7 +8,6 @@ import lombok.Builder;
 public record UserInfoResDto(
         Long userId,
         String username,
-        String nickname,
         String email,
         String bio,
         String profileImageUrl,
@@ -18,7 +17,6 @@ public record UserInfoResDto(
         return UserInfoResDto.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
-                .nickname(user.getNickname())
                 .email(user.getEmail())
                 .bio(user.getBio())
                 .profileImageUrl(user.getProfileImageUrl())

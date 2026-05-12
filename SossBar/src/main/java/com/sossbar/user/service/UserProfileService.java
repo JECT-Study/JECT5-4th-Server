@@ -23,7 +23,7 @@ public class UserProfileService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
 
-    // 프로필 페이지 - 내 프로필 수정(이름, 한 줄 소개, 프로필 이미지)
+    // 프로필 페이지 - 내 프로필 수정(실명, 한 줄 소개, 프로필 이미지)
     @Transactional
     public UserInfoResDto updateUserInfo(Principal principal, UserInfoUpdateReqDto userInfoUpdateReqDto, MultipartFile profileImage) {
         Long id = Long.parseLong(principal.getName());

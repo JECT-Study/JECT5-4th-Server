@@ -3,12 +3,10 @@ package com.sossbar.user.service;
 import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.global.config.S3Service;
-import com.sossbar.user.dto.request.UserNameUpdateReqDto;
-import com.sossbar.user.dto.request.UserOnboardingReqDto;
+import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
 import com.sossbar.user.dto.response.UserInfoResDto;
 import com.sossbar.user.entity.User;
 import com.sossbar.user.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +22,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
 
-    // 온보딩 - 사용자 추가 정보 입력 (이름, 한 줄 소개, 프로필 이미지)
+    // 온보딩 - 사용자 추가 정보 입력 (실명, 한 줄 소개, 프로필 이미지)
     @Transactional
-    public UserInfoResDto onboarding(Principal principal, UserOnboardingReqDto userOnboardingReqDto, MultipartFile profileImage) {
+    public UserInfoResDto onboarding(Principal principal, UserInfoUpdateReqDto userInfoUpdateReqDto, MultipartFile profileImage) {
         Long id = Long.parseLong(principal.getName());
         User user = getUserById(id);
 
@@ -44,40 +42,15 @@ public class UserService {
             profileImageUrl = s3Service.uploadFile(profileImage, "sossbar/profile");
         }
 
-        user.onboarding(userOnboardingReqDto, profileImageUrl);
+        user.updateUserInfo(userInfoUpdateReqDto, profileImageUrl);
 
         return UserInfoResDto.from(user);
     }
 
-    // 마이페이지 - 내 계정 정보 조회(닉네임, 이메일)
+    // 마이페이지 - 내 계정 정보 조회(실명, 이메일)
     public UserInfoResDto getUserInfo(Principal principal) {
         Long id = Long.parseLong(principal.getName());
         User user = getUserById(id);
-
-        return UserInfoResDto.from(user);
-    }
-
-    @Transactional
-    // 마이페이지 - 내 닉네임 수정
-    public UserInfoResDto updateUserNickname(Principal principal, UserNameUpdateReqDto userNameUpdateReqDto) {
-        Long id = Long.parseLong(principal.getName());
-        User user = getUserById(id);
-
-        String newNickname = userNameUpdateReqDto.nickname();
-
-        // 닉네임 중복 체크 (본인 제외)
-        if (userRepository.existsByNicknameAndIdNot(
-                newNickname,
-                user.getId()
-        )) {
-
-            throw new BusinessException(
-                    ErrorCode.VALIDATION_ERROR,
-                    "이미 사용 중인 닉네임입니다."
-            );
-        }
-
-        user.updateUserNickname(newNickname);
 
         return UserInfoResDto.from(user);
     }
