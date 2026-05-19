@@ -6,6 +6,8 @@ import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.repository.ReviewSpectrumRepository;
 import com.sossbar.review.repository.ReviewTagRepository;
+import com.sossbar.review_profile.dto.response.SpectrumInfoResDto;
+import com.sossbar.review_profile.dto.response.SpectrumListResDto;
 import com.sossbar.review_profile.dto.response.TagInfoResDto;
 import com.sossbar.review_profile.dto.response.TagListResDto;
 import com.sossbar.user.entity.User;
@@ -42,6 +44,27 @@ public class ReviewProfileService {
         List<TagInfoResDto> allTags = reviewTagRepository.findTagStatisticsByUserAndProject(user, project);
 
         return TagListResDto.from(allTags);
+    }
+
+    // 3. 스펙트럼 전체 조회
+    public SpectrumListResDto getAllSpectrums(Long userId) {
+        User user = getUserById(userId);
+
+        Long totalCount = reviewSpectrumRepository.countSpectrumParticipantsByUser(user);
+        List<SpectrumInfoResDto> spectrums = reviewSpectrumRepository.findSpectrumStatisticsByUser(user);
+
+        return SpectrumListResDto.from(totalCount, spectrums);
+    }
+
+    // 4. 스펙트럼 프로젝트별 조회
+    public SpectrumListResDto getSpectrumsByProject(Long userId, Long projectId) {
+        User user = getUserById(userId);
+        Project project = getProjectById(projectId);
+
+        Long totalCount = reviewSpectrumRepository.countSpectrumParticipantsByUserAndProject(user, project);
+        List<SpectrumInfoResDto> spectrums = reviewSpectrumRepository.findSpectrumStatisticsByUserAndProject(user, project);
+
+        return SpectrumListResDto.from(totalCount, spectrums);
     }
 
     // entity 찾는 공통 메소드
