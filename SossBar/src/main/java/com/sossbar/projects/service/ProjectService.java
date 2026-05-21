@@ -223,6 +223,12 @@ public class ProjectService {
                     ErrorCode.UNAUTHORIZED_MEMBER_CONFIRMATION_EXCEPTION.getMessage() + " (projectId: " + projectId + ", userId: " + loginUserId + ")");
         }
 
+        if(project.getProjectStatus() != ProjectStatus.IN_PROGRESS) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_PROJECT_STATUS_EXCEPTION,
+                    ErrorCode.UNAUTHORIZED_MEMBER_CONFIRMATION_EXCEPTION.getMessage() + "(projectId: " + projectId + ", currentStatus: " + project.getProjectStatus() + ")");
+        }
+
         project.updateProjectStatus(ProjectStatus.COMPLETED);
     }
 }
