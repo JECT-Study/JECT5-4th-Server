@@ -22,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -76,13 +78,22 @@ public class ProjectService {
 
         // 2. 내가 속한 ProjectMember 목록 조회 (fetch join으로 project 포함 → N+1 방지)
         List<ProjectMember> myMemberships = projectMemberRepository.findAllByUser(user);
+        List<Project> myProjects = myMemberships.stream()
+                .map(ProjectMember::getProject)
+                .toList();
+
+        List<ProjectMember> allMembers = projectMemberRepository.findAllByProjects(myProjects);
+
+        Map<Long, List<ProjectMember>> membersByProject = allMembers.stream()
+                .collect(Collectors.groupingBy(pm -> pm.getProject().getProjectId()));
 
         // 3. 각 Project의 전체 멤버 조회 후 나를 제외하고 MyProjectResponse로 변환
         return myMemberships.stream()
                 .map(pm -> {
-                    List<ProjectMember> otherMembers = projectMemberRepository.findAllByProject(pm.getProject())
+                    List<ProjectMember> otherMembers = membersByProject
+                            .getOrDefault(pm.getProject().getProjectId(), List.of())
                             .stream()
-                            .filter(m -> !m.getUser().getId().equals(pm.getUser().getId()))
+                            .filter(m -> !m.getUser().getId().equals(userId))
                             .toList();
                     return toMyResponse(pm, otherMembers);
                 })
@@ -103,6 +114,7 @@ public class ProjectService {
         // TODO: 후기 작성이 완료된 프로젝트만 외부에 노출할 경우 아래 filter 활성화
         // 후기 작성 완료 상태 = ProjectStatus.ARCHIVED
         // .filter(pm -> pm.getProject().getProjectStatus() == ProjectStatus.ARCHIVED)
+
         return memberships.stream()
                 .map(pm -> toPublicResponse(pm.getProject()))
                 .toList();
