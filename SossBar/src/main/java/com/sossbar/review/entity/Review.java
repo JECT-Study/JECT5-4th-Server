@@ -5,10 +5,6 @@ import com.sossbar.projects.entity.Project;
 import com.sossbar.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
