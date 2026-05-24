@@ -19,7 +19,7 @@ public interface ReviewSpectrumRepository extends JpaRepository<ReviewSpectrum, 
                 SELECT new com.sossbar.review_profile.dto.response.SpectrumInfoResDto(
                     sa.spectrumAxisId,
                     sa.axisName,
-                    AVG(rs.strength),
+                    CAST(ROUND(AVG(rs.strength)) as integer),
                     SUM(CASE WHEN rs.strength <= 3 THEN 1 ELSE 0 END),
                     SUM(CASE WHEN rs.strength >= 4 THEN 1 ELSE 0 END)
                 )
@@ -37,7 +37,7 @@ public interface ReviewSpectrumRepository extends JpaRepository<ReviewSpectrum, 
                 SELECT new com.sossbar.review_profile.dto.response.SpectrumInfoResDto(
                     sa.spectrumAxisId,
                     sa.axisName,
-                    AVG(rs.strength),
+                    CAST(ROUND(AVG(rs.strength)) as integer),
                     SUM(CASE WHEN rs.strength <= 3 THEN 1 ELSE 0 END),
                     SUM(CASE WHEN rs.strength >= 4 THEN 1 ELSE 0 END)
                 )
