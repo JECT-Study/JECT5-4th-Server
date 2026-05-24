@@ -39,7 +39,7 @@ public class ProjectService {
     public ProjectResponse createProject(Principal principal, ProjectCreateRequest request, String imageUrl) {
         // 1. 요청자 조회
         Long userId = Long.parseLong(principal.getName());
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
@@ -71,7 +71,7 @@ public class ProjectService {
     public List<MyProjectResponse> getMyProjects(Principal principal) {
         // 1. principal로 userId 추출 → User 조회
         Long userId = Long.parseLong(principal.getName());
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
@@ -102,7 +102,7 @@ public class ProjectService {
 
     public List<PublicProjectResponse> getUserProjects(Long userId) {
         // 1. 조회 대상 User 조회
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
@@ -220,7 +220,7 @@ public class ProjectService {
     @Transactional
     public void inviteProjectMember(Principal principal, Long projectId) {
         Long loginUserId = Long.parseLong(principal.getName());
-        User user = userRepository.findById(loginUserId)
+        User user = userRepository.findByIdAndIsDeletedFalse(loginUserId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + loginUserId));
@@ -255,7 +255,7 @@ public class ProjectService {
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
 
-        User loginUser = userRepository.findById(loginUserId)
+        User loginUser = userRepository.findByIdAndIsDeletedFalse(loginUserId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + loginUserId));
@@ -299,7 +299,7 @@ public class ProjectService {
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
 
-        User loginUser = userRepository.findById(loginUserId)
+        User loginUser = userRepository.findByIdAndIsDeletedFalse(loginUserId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + loginUserId));

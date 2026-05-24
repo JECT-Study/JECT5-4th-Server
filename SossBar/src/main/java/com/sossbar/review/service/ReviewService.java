@@ -58,9 +58,9 @@ public class ReviewService {
             throw new IllegalArgumentException(e);
         }
 
-        User reviewer = userRepository.findById(reviewerIdentifier)
+        User reviewer = userRepository.findByIdAndIsDeletedFalse(reviewerIdentifier)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION, reviewerIdentifier+""));
-        User reviewee = userRepository.findById(reviewReqDto.getRevieweeId())
+        User reviewee = userRepository.findByIdAndIsDeletedFalse(reviewReqDto.getRevieweeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION, reviewReqDto.getRevieweeId()+""));
 
         if (reviewRepository.existsByReviewerAndReviewee(reviewer, reviewee)) {
