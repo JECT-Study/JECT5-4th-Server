@@ -71,7 +71,7 @@ public class ReviewService {
             throw new BusinessException(ErrorCode.SELF_REVIEW_NOT_ALLOWED, "");
         }
 
-        Project project = projectRepository.findById(reviewReqDto.getProjectId())
+        Project project = projectRepository.findActiveProjectById(reviewReqDto.getProjectId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND_EXCEPTION, reviewReqDto.getProjectId()+""));
 
         Review savedReview = reviewRepository.save(reviewReqDto.toEntity(reviewer, reviewee, project));

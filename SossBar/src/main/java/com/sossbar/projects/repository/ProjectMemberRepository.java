@@ -30,4 +30,6 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     boolean existsByProjectAndUser(Project project, User user);
 
     Optional<ProjectMember> findByProjectAndUser(Project project, User user);
+
+    Optional<ProjectMember> findFirstByProjectAndUser_IdNotOrderByCreatedAtAsc(Project project, Long userId);
 }

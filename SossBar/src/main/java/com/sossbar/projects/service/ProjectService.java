@@ -139,18 +139,18 @@ public class ProjectService {
         return findProjectById(projectId).getProjectImage();
     }
 
-    // Delete: 추가적으로 정책 논의 필요.
+    // Delete: 추가적으로 정책 논의 필요. -> soft deleted로 '삭제' 상태로 변경
     @Transactional
     public void deleteProject(Long projectId) {
         Project project = findProjectById(projectId);
-        // ProjectMember 먼저 삭제 (FK 제약조건)
+        // 프로젝트 상태 변경
+        project.deleteProject();
         projectMemberRepository.deleteAllByProject(project);
-        projectRepository.delete(project);
     }
 
     // 공통 조회 메서드
     private Project findProjectById(Long projectId) {
-        return projectRepository.findById(projectId)
+        return projectRepository.findActiveProjectById(projectId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
@@ -225,7 +225,7 @@ public class ProjectService {
                         ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + loginUserId));
 
-        Project project = projectRepository.findById(projectId)
+        Project project = projectRepository.findActiveProjectById(projectId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
@@ -250,7 +250,7 @@ public class ProjectService {
         // 유저가 팀장인지 확인
         Long loginUserId = Long.parseLong(principal.getName());
 
-        Project project = projectRepository.findById(projectId)
+        Project project = projectRepository.findActiveProjectById(projectId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
@@ -294,7 +294,7 @@ public class ProjectService {
     public void confirmProjectMembers(Principal principal, Long projectId) {
         Long loginUserId = Long.parseLong(principal.getName());
 
-        Project project = projectRepository.findById(projectId)
+        Project project = projectRepository.findActiveProjectById(projectId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));

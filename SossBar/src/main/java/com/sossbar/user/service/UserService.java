@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -82,22 +81,16 @@ public class UserService {
             // 리더인 경우 권한 위임
             if (isLeader) {
                 // 남은 팀원
-                List<ProjectMember> remainMembers =
-                        projectMemberRepository.findAllByProject(project)
-                                .stream()
-                                .filter(pm -> !pm.getUser().getId().equals(user.getId()))
-                                .sorted(Comparator.comparing(ProjectMember::getCreatedAt))
-                                .toList();
+                ProjectMember nextLeader = projectMemberRepository
+                                .findFirstByProjectAndUser_IdNotOrderByCreatedAtAsc(project, user.getId())
+                                .orElse(null);
 
-                // 남은 팀원이 없으면 프로젝트 삭제
-                if (remainMembers.isEmpty()) {
-                    projectMemberRepository.deleteAllByProject(project);
-                    projectRepository.delete(project);
+                // 남은 팀원이 없으면 프로젝트 상태 변경(DELETED)
+                if (nextLeader == null) {
+                    project.deleteProject();
+                    projectMemberRepository.delete(membership);
                     continue;
                 }
-
-                // 가장 먼저 참여한 팀원
-                ProjectMember nextLeader = remainMembers.get(0);
 
                 // 리더 권한 위임
                 nextLeader.changeMemberStatus(MemberStatus.LEADER);
