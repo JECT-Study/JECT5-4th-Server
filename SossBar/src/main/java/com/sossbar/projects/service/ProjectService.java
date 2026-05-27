@@ -87,9 +87,6 @@ public class ProjectService {
 
         List<ProjectMember> allMembers = projectMemberRepository.findAllByProjects(myProjects);
 
-        System.out.println("allMembers size: " + allMembers.size()); // 지우기
-        allMembers.forEach(pm -> System.out.println("projectId: " + pm.getProject().getProjectId() + ", userId: " + pm.getUser().getId())); //지우기
-
         Map<Long, List<ProjectMember>> membersByProject = allMembers.stream()
                 .collect(Collectors.groupingBy(pm -> pm.getProject().getProjectId()));
 
