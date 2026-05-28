@@ -13,12 +13,6 @@ public class PublicProjectResponse {
     private Long projectId;
     private String projectName;
     private String host;
-
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startDate;
-
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime endDate;
-
     private String projectImage;
 }
