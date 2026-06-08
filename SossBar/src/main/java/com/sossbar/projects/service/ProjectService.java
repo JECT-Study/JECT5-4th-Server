@@ -79,10 +79,14 @@ public class ProjectService {
 
         // 2. 내가 속한 ProjectMember 목록 조회 (fetch join으로 project 포함 → N+1 방지)
         List<ProjectMember> myMemberships = projectMemberRepository.findAllByUser(user);
-        List<Project> myProjects = myMemberships.stream()
+
+        List<ProjectMember> filteredMemberships = myMemberships.stream()
+                .filter(pm -> pm.getProject().getProjectStatus() == ProjectStatus.COMPLETED
+                        || pm.getProject().getProjectStatus() == ProjectStatus.ARCHIVED) // 팀원 확정된 프로젝트 + 리뷰 작성 완료된 프로젝트만 필터링
+                .toList();
+
+        List<Project> myProjects = filteredMemberships.stream()
                 .map(ProjectMember::getProject)
-                .filter(p -> p.getProjectStatus() == ProjectStatus.COMPLETED
-                || p.getProjectStatus() == ProjectStatus.ARCHIVED)
                 .toList();
 
         List<ProjectMember> allMembers = projectMemberRepository.findAllByProjects(myProjects);
@@ -125,10 +129,8 @@ public class ProjectService {
 
         // 3. 각 Project의 전체 멤버 조회 후 PublicProjectResponse로 변환
         return memberships.stream()
-                .filter(pm -> {
-                    ProjectStatus status = pm.getProject().getProjectStatus();
-                    return status == ProjectStatus.COMPLETED || status == ProjectStatus.ARCHIVED;
-                }) // 팀원 확정된 프로젝트 + 리뷰 작성 완료된 프로젝트만 필터링
+                .filter(pm -> pm.getProject().getProjectStatus() == ProjectStatus.COMPLETED
+                || pm.getProject().getProjectStatus() == ProjectStatus.ARCHIVED) // 팀원 확정된 프로젝트 + 리뷰 작성 완료된 프로젝트만 필터링
                 .map(pm -> toPublicResponse(pm.getProject()))
                 .toList();
     }
