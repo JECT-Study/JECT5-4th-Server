@@ -102,8 +102,6 @@ public class ProjectService {
 
         // 3. 각 Project의 전체 멤버 조회 후 나를 제외하고 MyProjectResponse로 변환
         return myMemberships.stream()
-                .filter(pm -> pm.getProject().getProjectStatus() == ProjectStatus.COMPLETED
-                        || pm.getProject().getProjectStatus() == ProjectStatus.ARCHIVED) // 팀원 확정된 프로젝트 + 리뷰 작성 완료된 프로젝트만 필터링
                 .map(pm -> {
                     List<ProjectMember> allProjectMembers = membersByProject
                             .getOrDefault(pm.getProject().getProjectId(), List.of());
