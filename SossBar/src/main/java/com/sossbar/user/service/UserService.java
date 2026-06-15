@@ -107,7 +107,7 @@ public class UserService {
             if (isLeader) {
                 // 남은 팀원
                 ProjectMember nextLeader = projectMemberRepository
-                                .findFirstByProjectAndUser_IdNotOrderByCreatedAtAsc(project, user.getId())
+                                .findFirstByProjectAndUser_IdNotAndUser_IsDeletedFalseOrderByCreatedAtAsc(project, user.getId())
                                 .orElse(null);
 
                 // 남은 팀원이 없으면 프로젝트 상태 변경(DELETED)

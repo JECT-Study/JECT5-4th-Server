@@ -33,12 +33,13 @@ public class UserProfileService {
         String newProfileImageUrl = user.getProfileImageUrl();
 
         if (profileImage != null && !profileImage.isEmpty()) {
-            // 기존 이미지가 존재한다면 S3에서 삭제
+            // 새 이미지 업로드
+            String uploadedImageUrl = s3Service.uploadFile(profileImage, "sossbar/profile");
+            // 업로드 성공 후 기존 이미지가 존재한다면 S3에서 삭제
             if (newProfileImageUrl != null && !newProfileImageUrl.isBlank()) {
                 s3Service.deleteFile(newProfileImageUrl);
             }
-            // 새 이미지 업로드
-            newProfileImageUrl = s3Service.uploadFile(profileImage, "sossbar/profile");
+            newProfileImageUrl = uploadedImageUrl;
         }
 
         user.updateUserInfo(userInfoUpdateReqDto, newProfileImageUrl);
