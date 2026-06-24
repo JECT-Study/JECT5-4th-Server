@@ -74,7 +74,7 @@ public class ProjectMemberService {
                     "팀장은 스스로를 삭제할 수 없습니다. (projectId: " + projectId + ", userId: " + loginUserId + ")");
         }
 
-        User targetUser = userRepository.findById(userId)
+        User targetUser = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
@@ -109,7 +109,7 @@ public class ProjectMemberService {
         if(project.getProjectStatus() != ProjectStatus.IN_PROGRESS) {
             throw new BusinessException(
                     ErrorCode.INVALID_PROJECT_STATUS_EXCEPTION,
-                    ErrorCode.UNAUTHORIZED_MEMBER_CONFIRMATION_EXCEPTION.getMessage() + "(projectId: " + projectId + ", currentStatus: " + project.getProjectStatus() + ")");
+                    ErrorCode.INVALID_PROJECT_STATUS_EXCEPTION.getMessage() + "(projectId: " + projectId + ", currentStatus: " + project.getProjectStatus() + ")");
         }
 
         project.updateProjectStatus(ProjectStatus.COMPLETED);

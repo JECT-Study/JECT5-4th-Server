@@ -55,12 +55,6 @@ public class UserProfileService {
                     "직군을 입력해 주세요.");
         }
 
-        if (userInfoUpdateReqDto.links() != null && userInfoUpdateReqDto.links().size() > 3) {
-            throw new BusinessException(
-                    ErrorCode.VALIDATION_ERROR,
-                    "Link는 최대 3개까지만 추가할 수 있습니다.");
-        }
-
         // 프로필 수정에서도 link 수정
         List<UserLink> newLinks = null;
         if (userInfoUpdateReqDto.links() != null) {

@@ -68,13 +68,6 @@ public class UserService {
                     "직군을 입력해 주세요.");
         }
 
-        // 최대 3개까지만 링크 추가 가능
-        if (userInfoUpdateReqDto.links() != null && userInfoUpdateReqDto.links().size() > 3) {
-            throw new BusinessException(
-                    ErrorCode.VALIDATION_ERROR,
-                    "Link는 최대 3개까지만 추가할 수 있습니다.");
-        }
-
         // 아무것도 보내지 않으면 초기 이미지는 null로
         String profileImageUrl = null;
         if (profileImage != null && !profileImage.isEmpty()) {
