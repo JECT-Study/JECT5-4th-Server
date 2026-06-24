@@ -28,7 +28,6 @@ import java.security.Principal;
 import java.util.List;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
@@ -89,9 +88,7 @@ public class UserService {
                     .map(linkDto -> UserLinkReqDto.createLink(user, linkDto))
                     .toList();
         }
-        user.getLinks().forEach(link ->
-                log.info("id={}, url={}", link.getId(), link.getUserLink())
-        );
+
         user.updateUserInfo(userInfoUpdateReqDto, profileImageUrl, newLinks);
         userRepository.saveAndFlush(user);
 
