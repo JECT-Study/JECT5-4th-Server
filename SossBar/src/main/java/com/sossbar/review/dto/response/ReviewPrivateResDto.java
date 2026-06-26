@@ -10,15 +10,13 @@ import lombok.Getter;
 public class ReviewPrivateResDto extends CommonReviewResDto {
     private String projectName;
     private String host;
-    private String positiveFeedback;
-    private String negativeFeedback;
+    private String feedback;
 
     public static ReviewPrivateResDto from(Review review) {
         ReviewPrivateResDto dto = ReviewPrivateResDto.builder()
                 .projectName(review.getProject().getProjectName())
                 .host(review.getProject().getHost())
-                .positiveFeedback(review.getPositiveFeedback())
-                .negativeFeedback(review.getNegativeFeedback())
+                .feedback(review.getFeedback())
                 .build();
         dto.reviewId = review.getReviewId();
         dto.projectImage = review.getProject().getProjectImage();
