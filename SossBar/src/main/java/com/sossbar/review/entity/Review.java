@@ -17,7 +17,7 @@ public class Review extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewId;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String feedback;
 
     @ManyToOne(fetch = FetchType.LAZY)

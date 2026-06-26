@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 public class ReviewReqDto {
     @NotBlank
-    @Size(min = 10)
+    @Size(min = 10, max = 1000)
     private String feedback;
 
     @NotNull
