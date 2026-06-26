@@ -124,6 +124,7 @@ public class ReviewService {
     }
 
     // 전체 후기 조회
+    @Transactional(readOnly = true)
     public List<CommonReviewResDto> getReviews(Principal principal, Long userId) {
         Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
         List<Review> reviews = reviewRepository.findAllByRevieweeId(userId);
@@ -141,6 +142,7 @@ public class ReviewService {
     }
 
     // 프로젝트별 후기 조회
+    @Transactional(readOnly = true)
     public List<CommonReviewResDto> getReviewsByProject(Principal principal, Long userId, Long projectId) {
         Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
         List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(userId, projectId);
