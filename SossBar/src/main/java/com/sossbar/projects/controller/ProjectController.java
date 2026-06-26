@@ -53,7 +53,7 @@ public class ProjectController {
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getUserProjects(userId));
     }
 
-    @Operation(summary = "프로젝트 조회", description = "프로젝트 ID로 단일 프로젝트를 조회하는 API입니다.")
+    @Operation(summary = "프로젝트 상세 조회", description = "프로젝트 ID로 단일 프로젝트를 조회하는 API입니다.")
     @GetMapping("/{projectId:\\d+}")
     public ApiResTemplate<ProjectResponse> getProject(
             @PathVariable Long projectId,

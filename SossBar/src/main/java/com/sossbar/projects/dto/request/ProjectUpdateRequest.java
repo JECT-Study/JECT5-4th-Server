@@ -20,7 +20,4 @@ public class ProjectUpdateRequest {
     private String host;
 
     // 이미지는 MultipartFile로 별도 수신 (Controller의 @RequestPart("image") 참고)
-
-    private UserPosition projectPosition;
-    private String projectDetailPosition;
 }

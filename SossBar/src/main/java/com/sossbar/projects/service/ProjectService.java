@@ -164,13 +164,6 @@ public class ProjectService {
                 ).orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()));
 
-        if (request.getProjectPosition() != null) {
-            myMember.updateProjectPosition(
-                    request.getProjectPosition(),
-                    request.getProjectDetailPosition()
-            );
-        }
-
         List<ProjectMember> members = projectMemberRepository.findAllByProject(project);
         return ProjectResponse.from(project, members, myMember);
     }
