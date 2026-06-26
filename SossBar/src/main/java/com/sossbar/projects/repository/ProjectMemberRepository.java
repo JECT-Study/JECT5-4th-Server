@@ -22,6 +22,9 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     @Query("select pm from ProjectMember pm join fetch pm.user u where pm.project in :projects and u.isDeleted = false")
     List<ProjectMember> findAllByProjects(@Param("projects") List<Project> projects);
 
+    @Query("select pm from ProjectMember pm join fetch pm.project join fetch pm.user where pm.project in :projects and pm.user in :users")
+    List<ProjectMember> findAllByProjectInAndUserIn(List<Project> projects, List<User> users);
+
     @Modifying
     @Query("delete from ProjectMember pm where pm.project = :project")
     void deleteAllByProject(@Param("project") Project project);
