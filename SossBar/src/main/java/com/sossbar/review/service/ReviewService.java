@@ -152,6 +152,7 @@ public class ReviewService {
     }
 
     // 전체 후기 조회
+    @Transactional(readOnly = true)
     public ReviewCursorResDto getReviews(Principal principal, Long userId, Long cursor, int size) {
         // 페이지가 1 미만이면 오류 발생
         if (size < 1) throw new BusinessException(ErrorCode.INVALID_PAGE_SIZE_EXCEPTION, "");
@@ -191,6 +192,7 @@ public class ReviewService {
     }
 
     // 프로젝트별 후기 조회
+    @Transactional(readOnly = true)
     public List<CommonReviewResDto> getReviewsByProject(Principal principal, Long userId, Long projectId) {
         Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
         List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(userId, projectId);
