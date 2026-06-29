@@ -29,18 +29,31 @@ public class ProjectMemberService {
 
     // 팀원 초대
     @Transactional
-    public void inviteProjectMember(Principal principal, Long projectId) {
+    public void inviteProjectMember(Principal principal, String projectLink) {
         User user = getLoginUser(principal);
         Long loginUserId = user.getId();
-        Project project = getProjectById(projectId);
+        Project project = getProjectByLink(projectLink);
 
-        if(projectMemberRepository.existsByProjectAndUser(project, user)) {
+        ProjectMember projectMember =
+                projectMemberRepository.findByProjectAndUser(project, user)
+                        .orElse(null);
+
+        if (projectMember != null) {
+            if (projectMember.isBanned()) {
+                throw new BusinessException(
+                        ErrorCode.PROJECT_MEMBER_ALREADY_EXISTS_EXCEPTION,
+                        "한 번 추방된 프로젝트에는 다시 참여할 수 없습니다."
+                );
+            }
+
             throw new BusinessException(
                     ErrorCode.PROJECT_MEMBER_ALREADY_EXISTS_EXCEPTION,
-                    ErrorCode.PROJECT_MEMBER_ALREADY_EXISTS_EXCEPTION.getMessage() + " (projectId: " + projectId + ", userId: " + loginUserId + ")");
+                    ErrorCode.PROJECT_MEMBER_ALREADY_EXISTS_EXCEPTION.getMessage()
+                            + " (projectLink: " + projectLink + ", userId: " + loginUserId + ")"
+            );
         }
 
-        ProjectMember projectMember = ProjectMember.builder()
+        projectMember = ProjectMember.builder()
                 .project(project)
                 .user(user)
                 .memberStatus(MemberStatus.MEMBER)
@@ -94,7 +107,7 @@ public class ProjectMemberService {
                         ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage() + " (projectId: " + projectId + ", userId: " + userId + ")"));
 
-        projectMemberRepository.delete(targetMember);
+        targetMember.deleteMember();
     }
 
     // 팀원 확정
@@ -132,7 +145,7 @@ public class ProjectMemberService {
             return;
         }
 
-        long memberCount = projectMemberRepository.countByProject(project);
+        long memberCount = projectMemberRepository.countByProjectAndIsBannedFalse(project);
         long reviewCount = reviewRepository.countByProject(project);
         long totalReviewCount = (long) memberCount * (memberCount - 1);
 
@@ -140,6 +153,7 @@ public class ProjectMemberService {
             project.updateProjectStatus(ProjectStatus.ARCHIVED);
         }
     }
+
     // 공통 메소드
     private User getLoginUser(Principal principal) {
         Long userId = Long.parseLong(principal.getName());
@@ -154,5 +168,12 @@ public class ProjectMemberService {
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
+    }
+
+    private Project getProjectByLink(String projectLink) {
+        return projectRepository.findActiveProjectByProjectLink(projectLink)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectLink));
     }
 }
