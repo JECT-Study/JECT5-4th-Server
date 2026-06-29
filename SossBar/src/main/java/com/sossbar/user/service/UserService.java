@@ -43,6 +43,14 @@ public class UserService {
         Long id = Long.parseLong(principal.getName());
         User user = getUserById(id);
 
+        // 온보딩 마케팅 동의 false 불가 예외
+        if (!userInfoUpdateReqDto.marketingAgree()) {
+            throw new BusinessException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "온보딩 시 마케팅 동의는 필수입니다."
+            );
+        }
+
         // 이미 온보딩 완료된 경우 예외
         if (user.getUsername() != null) {
             throw new BusinessException(
