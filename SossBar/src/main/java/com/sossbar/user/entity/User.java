@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -45,6 +46,7 @@ public class User extends BaseTimeEntity {
     private boolean isDeleted = false;
 
     private boolean marketingAgree = true;
+    private String userLink;
 
     @Builder
     public User(String username, String email, String bio, String profileImageUrl, UserType userType, UserPosition defaultPosition1, UserPosition defaultPosition2, String refreshToken, boolean marketingAgree) {
@@ -117,5 +119,13 @@ public class User extends BaseTimeEntity {
     public void updateDefaultPositions(List<UserPosition> positions) {
         this.defaultPosition1 = positions.get(0);
         this.defaultPosition2 = positions.size() > 1 ? positions.get(1) : null;
+    }
+
+    // 사용자만의 고유 uuid 생성
+    @PrePersist
+    public void generateUserLink() {
+        if (this.userLink == null) {
+            this.userLink = UUID.randomUUID().toString();
+        }
     }
 }

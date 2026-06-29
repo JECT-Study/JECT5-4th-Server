@@ -17,7 +17,10 @@ public record UserInfoResDto(
         UserType userType,
         List<UserPosition> defaultPositions,
         List<UserLinkResDto> links,
-        boolean marketingAgree
+        boolean marketingAgree,
+
+        // 사용자만의 고유 uuid
+        String userLink
 
 ) {
     public static UserInfoResDto from(User user) {
@@ -31,6 +34,7 @@ public record UserInfoResDto(
                 .defaultPositions(user.getDefaultPositions())
                 .links(user.getLinks().stream().map(UserLinkResDto::from).toList())
                 .marketingAgree(user.isMarketingAgree())
+                .userLink(user.getUserLink())
                 .build();
     }
 }

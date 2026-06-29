@@ -72,8 +72,8 @@ public class UserProfileService {
     }
 
     // 프로필 페이지 - 사용자 프로필 조회, userId로 구분
-    public UserProfileInfoResDto getUserProfile(Long userId) {
-        User user = getUserById(userId);
+    public UserProfileInfoResDto getUserProfile(String userLink) {
+        User user = getUserByLink(userLink);
 
         return UserProfileInfoResDto.from(user);
     }
@@ -83,5 +83,11 @@ public class UserProfileService {
         return userRepository.findByIdAndIsDeletedFalse(userId).orElseThrow(
                 () -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION
                         , ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
+    }
+    private User getUserByLink(String userLink) {
+        return userRepository.findByUserLinkAndIsDeletedFalse(userLink)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userLink));
     }
 }
