@@ -47,8 +47,8 @@ public class ProjectMember extends BaseTimeEntity {
 
     // 후기 작성시 디폴트 직군 변경 가능
     public void updateProjectPosition(List<UserPosition> positions) {
-        this.projectPosition1 = positions.get(0);
-        this.projectPosition2 = positions.size() > 1 ? positions.get(1) : null;
+        this.projectPosition1 = (positions != null && !positions.isEmpty()) ? positions.get(0) : null;
+        this.projectPosition2 = (positions != null && positions.size() > 1) ? positions.get(1) : null;
     }
 
     // 직군 조회 메소드

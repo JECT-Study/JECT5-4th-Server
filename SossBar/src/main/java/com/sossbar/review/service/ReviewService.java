@@ -256,7 +256,7 @@ public class ReviewService {
     }
 
     private boolean isAllReviewCompleted(Project project) {
-        int memberCount = projectMemberRepository.findAllByProject(project).size();
+        long memberCount = projectMemberRepository.countByProject(project);
         long reviewCount = reviewRepository.countByProject(project);
         long totalReviewCount = (long) memberCount * (memberCount - 1);
 
