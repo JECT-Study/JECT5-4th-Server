@@ -189,6 +189,12 @@ public class ProjectService {
 
         validateProjectPeriod(startDate, endDate);
 
+        // 팀 확정 이후 수정 불가능
+        if (project.getProjectStatus() == ProjectStatus.ARCHIVED) {
+            throw new BusinessException(ErrorCode.INVALID_PROJECT_STATUS_EXCEPTION,
+                    "팀 확정 이후에는 팀 정보 수정이 불가합니다.");
+        }
+
         project.update(
                 request.getProjectName(),
                 request.getHost(),
