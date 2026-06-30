@@ -79,14 +79,15 @@ public class ReviewService {
 
         // 프로젝트 멤버 조회
         ProjectMember projectMember = projectMemberRepository.findByProjectAndUser(project, reviewer)
-                        .orElseThrow(() -> new BusinessException(
-                                ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
-                                ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
-                        ));
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
+                ));
 
         List<UserPosition> positions = reviewReqDto.getProjectPositions();
 
         if (projectMember.getProjectPosition1() == null) {
+
             if (positions == null || positions.isEmpty() || positions.size() > 2) {
                 throw new BusinessException(
                         ErrorCode.VALIDATION_ERROR,
@@ -127,19 +128,19 @@ public class ReviewService {
         List<SpectrumAxis> spectrumAxes = spectrumAxisRepository.findAllById(spectrumAxisIds);
 
         Map<Long, SpectrumAxis> spectrumAxisMap = spectrumAxes.stream()
-                        .collect(Collectors.toMap(SpectrumAxis::getSpectrumAxisId, axis -> axis));
+                .collect(Collectors.toMap(SpectrumAxis::getSpectrumAxisId, axis -> axis));
 
         if(spectrumAxisMap.size() != spectrumAxisIds.size()) {
             throw new BusinessException(ErrorCode.SPECTRUM_NOT_FOUND, "");
         }
 
         List<ReviewSpectrum> reviewSpectrums = reviewCreateReqDto.getSpectrumReqDtos().stream()
-                        .map(dto -> ReviewSpectrum.builder()
-                                .review(savedReview)
-                                .spectrumAxis(spectrumAxisMap.get(dto.getSpectrumAxisId()))
-                                .strength(dto.getSpectrumStrength())
-                                .build())
-                        .collect(Collectors.toList());
+                .map(dto -> ReviewSpectrum.builder()
+                        .review(savedReview)
+                        .spectrumAxis(spectrumAxisMap.get(dto.getSpectrumAxisId()))
+                        .strength(dto.getSpectrumStrength())
+                        .build())
+                .collect(Collectors.toList());
 
         reviewSpectrumRepository.saveAll(reviewSpectrums);
         updateProjectStatus(project);
@@ -149,7 +150,7 @@ public class ReviewService {
 
     // 전체 후기 조회
     @Transactional(readOnly = true)
-    public ReviewCursorResDto getReviews(Principal principal, Long userId, Long cursor, int size) {
+    public ReviewCursorResDto getReviews(Principal principal, String userLink, Long cursor, int size) {
         // 페이지가 1 미만이면 오류 발생
         if (size < 1) throw new BusinessException(ErrorCode.INVALID_PAGE_SIZE_EXCEPTION, "");
 
@@ -157,7 +158,9 @@ public class ReviewService {
 
         int pageSize = Math.min(100, Math.max(1, size));
         Pageable pageable = PageRequest.of(0, size + 1);
-        List<Review> reviews = reviewRepository.findByRevieweeIdWithCursor(userId, cursor, pageable);
+
+        User reviewee = getUserByLink(userLink);
+        List<Review> reviews = reviewRepository.findByRevieweeIdWithCursor(reviewee.getId(), cursor, pageable);
 
         boolean hasNext = reviews.size() > size;
         if(hasNext) reviews = reviews.subList(0, size);
@@ -165,7 +168,7 @@ public class ReviewService {
         Long nextCursor = hasNext ? reviews.get(reviews.size() - 1).getReviewId() : null;
 
         // 내 후기 / 사용자 후기 조회 결정
-        boolean isMine = userId != null && userId.equals(loginUserId);
+        boolean isMine = reviewee.getId().equals(loginUserId);
 
         Map<String, ProjectMember> projectMemberMap = getProjectMemberMap(reviews);
 
@@ -189,18 +192,19 @@ public class ReviewService {
 
     // 프로젝트별 후기 조회
     @Transactional(readOnly = true)
-    public List<CommonReviewResDto> getReviewsByProject(Principal principal, Long userId, Long projectId) {
+    public List<CommonReviewResDto> getReviewsByProject(Principal principal, String userLink, Long projectId) {
         Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
 
         // 후기 열람 가능 여부 검증
         Project project = getProject(projectId);
         validateReviewOpen(project);
 
-        List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(userId, projectId);
+        User reviewee = getUserByLink(userLink);
+        List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(reviewee.getId(), projectId);
 
         Map<String, ProjectMember> projectMemberMap = getProjectMemberMap(reviews);
 
-        boolean isMine = userId.equals(loginUserId);
+        boolean isMine = reviewee.getId().equals(loginUserId);
 
         return reviews.stream()
                 .map(review -> {
@@ -255,8 +259,8 @@ public class ReviewService {
     }
 
     private boolean isAllReviewCompleted(Project project) {
-        long memberCount = projectMemberRepository.countByProject(project);
-        long reviewCount = reviewRepository.countByProject(project);
+        long memberCount = projectMemberRepository.countByProjectAndIsBannedFalse(project);
+        long reviewCount = reviewRepository.countActiveMemberReviews(project);
         long totalReviewCount = (long) memberCount * (memberCount - 1);
 
         return reviewCount == totalReviewCount;
@@ -311,5 +315,12 @@ public class ReviewService {
         return userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
+    }
+
+    private User getUserByLink(String userLink) {
+        return userRepository.findByUserLinkAndIsDeletedFalse(userLink)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userLink));
     }
 }

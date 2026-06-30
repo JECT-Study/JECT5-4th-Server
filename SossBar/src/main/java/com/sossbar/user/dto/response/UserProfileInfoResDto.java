@@ -13,7 +13,8 @@ public record UserProfileInfoResDto(
         String bio,
         String profileImageUrl,
         List<UserPosition> defaultPositions,
-        List<UserLinkResDto> links
+        List<UserLinkResDto> links,
+        String userLink
 ) {
     public static UserProfileInfoResDto from(User user) {
         return UserProfileInfoResDto.builder()
@@ -23,6 +24,7 @@ public record UserProfileInfoResDto(
                 .profileImageUrl(user.getProfileImageUrl())
                 .defaultPositions(user.getDefaultPositions())
                 .links(user.getLinks().stream().map(UserLinkResDto::from).toList())
+                .userLink(user.getUserLink())
                 .build();
     }
 }

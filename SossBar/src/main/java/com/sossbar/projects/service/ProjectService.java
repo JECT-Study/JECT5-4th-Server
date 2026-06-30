@@ -120,12 +120,9 @@ public class ProjectService {
     }
 
     // 사용자 프로젝트 리스트 조회
-    public List<PublicProjectResponse> getUserProjects(Long userId) {
+    public List<PublicProjectResponse> getUserProjects(String userLink) {
         // 1. 조회 대상 User 조회
-        User user = userRepository.findByIdAndIsDeletedFalse(userId)
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
-                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
+        User user = getUserByLink(userLink);
 
         // 2. 해당 유저가 속한 ProjectMember 목록 조회 (fetch join으로 project 포함)
         List<ProjectMember> memberships = projectMemberRepository.findAllByUser(user);
@@ -232,5 +229,12 @@ public class ProjectService {
                     "프로젝트 시작일은 종료일보다 이후일 수 없습니다."
             );
         }
+    }
+
+    private User getUserByLink(String userLink) {
+        return userRepository.findByUserLinkAndIsDeletedFalse(userLink)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userLink));
     }
 }

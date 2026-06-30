@@ -35,6 +35,9 @@ public class ProjectMember extends BaseTimeEntity {
     @Column(name = "member_status", nullable = false)
     private MemberStatus memberStatus;   // 리더 / 멤버 구분
 
+    // 추방 여부
+    private boolean isBanned = false;
+
     @Enumerated(EnumType.STRING)
     private UserPosition projectPosition1;
     @Enumerated(EnumType.STRING)
@@ -64,5 +67,9 @@ public class ProjectMember extends BaseTimeEntity {
         }
 
         return positions;
+    }
+
+    public void deleteMember() {
+        this.isBanned = true;
     }
 }
