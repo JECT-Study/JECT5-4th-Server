@@ -86,8 +86,8 @@ public class ProjectService {
 
         Sort sortOption =
                 sort == SortType.LATEST
-                        ? Sort.by(Sort.Direction.DESC, "createdAt")
-                        : Sort.by(Sort.Direction.ASC, "createdAt");
+                        ? Sort.by(Sort.Direction.DESC, "project.createdAt")
+                        : Sort.by(Sort.Direction.ASC, "project.createdAt");
 
         // 2. 내가 속한 ProjectMember 목록 조회 (fetch join으로 project 포함 → N+1 방지)
         List<ProjectMember> myMemberships = projectMemberRepository.findAllByUser(user, sortOption);
@@ -141,8 +141,8 @@ public class ProjectService {
         User user = getUserByLink(userLink);
 
         Sort sortOption = sort == SortType.LATEST
-                ? Sort.by(Sort.Direction.DESC, "createdAt")
-                : Sort.by(Sort.Direction.ASC, "createdAt");
+                ? Sort.by(Sort.Direction.DESC, "project.createdAt")
+                : Sort.by(Sort.Direction.ASC, "project.createdAt");
 
         // 2. 해당 유저가 속한 ProjectMember 목록 조회 (fetch join으로 project 포함)
         List<ProjectMember> memberships = projectMemberRepository.findAllByUser(user, sortOption);

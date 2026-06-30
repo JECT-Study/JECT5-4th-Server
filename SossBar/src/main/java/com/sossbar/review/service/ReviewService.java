@@ -165,7 +165,7 @@ public class ReviewService {
         List<Review> reviews =
                 sort == SortType.LATEST
                 ? reviewRepository.findByRevieweeIdWithCursorDesc(reviewee.getId(), cursor, pageable)
-                : reviewRepository.findByRevieweeIdWithCursorDesc(reviewee.getId(), cursor, pageable);
+                : reviewRepository.findByRevieweeIdWithCursorAsc(reviewee.getId(), cursor, pageable);
 
         boolean hasNext = reviews.size() > size;
         if(hasNext) reviews = reviews.subList(0, size);
