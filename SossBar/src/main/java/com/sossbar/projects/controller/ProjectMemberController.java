@@ -32,10 +32,10 @@ public class ProjectMemberController {
     private final ProjectMemberService projectMemberService;
 
     @Operation(summary = "팀원 추가", description = "프로젝트에 팀원을 추가하는 API입니다.")
-    @PostMapping("/invite/{projectId}")
+    @PostMapping("/invite/{projectLink}")
     public ApiResTemplate<Void> inviteProjectMember(Principal principal,
-                                                    @PathVariable("projectId") Long projectId) {
-        projectMemberService.inviteProjectMember(principal, projectId);
+                                                    @PathVariable("projectLink") String projectLink) {
+        projectMemberService.inviteProjectMember(principal, projectLink);
         return ApiResTemplate.successResponse(SuccessCode.CREATE_SUCCESS, null);
     }
 
