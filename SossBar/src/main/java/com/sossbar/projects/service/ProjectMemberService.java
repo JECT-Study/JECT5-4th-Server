@@ -2,6 +2,8 @@ package com.sossbar.projects.service;
 
 import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
+import com.sossbar.notification.entity.NotificationType;
+import com.sossbar.notification.service.NotificationService;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.projects.enums.MemberStatus;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class ProjectMemberService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // 팀원 초대
     @Transactional
@@ -47,6 +51,20 @@ public class ProjectMemberService {
                 .build();
 
         projectMemberRepository.save(projectMember);
+
+        // 팀원 합류 알림 발송
+        List<User> existingMembers = projectMemberRepository.findAllByProject(project).stream()
+                .map(ProjectMember::getUser)
+                .filter(existingUser -> !existingUser.getId().equals(loginUserId)) // 본인 제외
+                .toList();
+
+        notificationService.sendNotification(
+                existingMembers,
+                NotificationType.PROJECT_JOINED,
+                "새로운 팀원이 도착했어요",
+                user.getUsername() + "님이 프로젝트 " + project.getProjectName() + "에 합류했어요."
+        );
+
     }
 
     // 팀원 삭제
@@ -94,7 +112,6 @@ public class ProjectMemberService {
         Long loginUserId = loginUser.getId();
         Project project = getProjectById(projectId);
 
-
         ProjectMember loginMember = projectMemberRepository.findByProjectAndUser(project, loginUser)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
@@ -113,6 +130,19 @@ public class ProjectMemberService {
         }
 
         project.updateProjectStatus(ProjectStatus.COMPLETED);
+
+        // 팀 확정 알림 발송
+        List<User> members = projectMemberRepository.findAllByProject(project)
+                .stream()
+                .map(ProjectMember::getUser)
+                .toList();
+
+        notificationService.sendNotification(
+                members,
+                NotificationType.TEAM_COMPLETED,
+                "팀이 확정되었어요",
+                project.getProjectName() + "후기를 작성해 보세요"
+        );
     }
 
     // 공통 메소드
