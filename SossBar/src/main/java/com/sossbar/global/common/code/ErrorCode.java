@@ -54,6 +54,7 @@ public enum ErrorCode {
     TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "일부 태그가 존재하지 않습니다.", "REVIEW-003"),
     SPECTRUM_NOT_FOUND(HttpStatus.NOT_FOUND, "일부 스펙트럼이 존재하지 않습니다.", "REVIEW-004"),
     INVALID_PAGE_SIZE_EXCEPTION(HttpStatus.BAD_REQUEST, "페이지 크기는 1 이상이어야 합니다.", "REVIEW-005"),
+    REVIEW_NOT_OPEN_EXCEPTION(HttpStatus.BAD_REQUEST, "후기를 열람할 수 없습니다.", "REVIEW-006"),
 
     //NOTIFICATION
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 알림이 존재하지 않습니다.", "NOTIFICATION-001"),
