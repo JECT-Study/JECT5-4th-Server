@@ -10,13 +10,17 @@ import com.sossbar.projects.dto.response.PublicProjectResponse;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.projects.enums.MemberStatus;
+import com.sossbar.projects.enums.ProjectFilterType;
 import com.sossbar.projects.enums.ProjectStatus;
+import com.sossbar.projects.enums.SortType;
 import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.repository.ReviewRepository;
 import com.sossbar.user.entity.User;
+import com.sossbar.user.entity.UserPosition;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,13 +66,15 @@ public class ProjectService {
                 .build();
         projectRepository.save(project);
 
+        List<UserPosition> positions = request.getProjectPositions();
+
         // 4. 생성자를 LEADER로 ProjectMember에 저장
         ProjectMember projectMember = ProjectMember.builder()
                 .user(user)
                 .project(project)
                 .memberStatus(MemberStatus.LEADER)
-                .projectPosition1(null)
-                .projectPosition2(null)
+                .projectPosition1(positions.get(0))
+                .projectPosition2(positions.size() > 1 ? positions.get(1) : null)
                 .build();
         projectMemberRepository.save(projectMember);
 
@@ -76,17 +82,30 @@ public class ProjectService {
     }
 
     // 내 프로젝트 리스트 조회
-    public List<MyProjectResponse> getMyProjects(Principal principal) {
+    public List<MyProjectResponse> getMyProjects(Principal principal, SortType sort, ProjectFilterType status) {
         // 1. principal로 userId 추출 → User 조회
         User user = getLoginUser(principal);
         Long userId = user.getId();
 
+        Sort sortOption =
+                sort == SortType.LATEST
+                        ? Sort.by(Sort.Direction.DESC, "project.createdAt")
+                        : Sort.by(Sort.Direction.ASC, "project.createdAt");
+
         // 2. 내가 속한 ProjectMember 목록 조회 (fetch join으로 project 포함 → N+1 방지)
-        List<ProjectMember> myMemberships = projectMemberRepository.findAllByUser(user);
+        List<ProjectMember> myMemberships = projectMemberRepository.findAllByUser(user, sortOption);
 
         // DELETED 제외
         List<ProjectMember> filteredMemberships = myMemberships.stream()
                 .filter(pm -> pm.getProject().getProjectStatus() != ProjectStatus.DELETED)
+                .filter(pm -> switch (status) {
+                    case ALL -> true;
+                    case IN_PROGRESS ->
+                            pm.getProject().getProjectStatus() == ProjectStatus.IN_PROGRESS;
+                    case COMPLETED ->
+                            pm.getProject().getProjectStatus() == ProjectStatus.COMPLETED
+                                    || pm.getProject().getProjectStatus() == ProjectStatus.ARCHIVED;
+                })
                 .toList();
 
         List<Project> myProjects = filteredMemberships.stream()
@@ -120,12 +139,16 @@ public class ProjectService {
     }
 
     // 사용자 프로젝트 리스트 조회
-    public List<PublicProjectResponse> getUserProjects(String userLink) {
+    public List<PublicProjectResponse> getUserProjects(String userLink, SortType sort) {
         // 1. 조회 대상 User 조회
         User user = getUserByLink(userLink);
 
+        Sort sortOption = sort == SortType.LATEST
+                ? Sort.by(Sort.Direction.DESC, "project.createdAt")
+                : Sort.by(Sort.Direction.ASC, "project.createdAt");
+
         // 2. 해당 유저가 속한 ProjectMember 목록 조회 (fetch join으로 project 포함)
-        List<ProjectMember> memberships = projectMemberRepository.findAllByUser(user);
+        List<ProjectMember> memberships = projectMemberRepository.findAllByUser(user, sortOption);
 
         // 3. 각 Project의 전체 멤버 조회 후 PublicProjectResponse로 변환
         return memberships.stream()
@@ -168,6 +191,12 @@ public class ProjectService {
                 : project.getEndDate();
 
         validateProjectPeriod(startDate, endDate);
+
+        // 팀 확정 이후 수정 불가능
+        if (project.getProjectStatus() == ProjectStatus.ARCHIVED) {
+            throw new BusinessException(ErrorCode.INVALID_PROJECT_STATUS_EXCEPTION,
+                    "팀 확정 이후에는 팀 정보 수정이 불가합니다.");
+        }
 
         project.update(
                 request.getProjectName(),
