@@ -86,20 +86,6 @@ public class ReviewService {
                         ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
                 ));
 
-        List<UserPosition> positions = reviewReqDto.getProjectPositions();
-
-        if (projectMember.getProjectPosition1() == null) {
-
-            if (positions == null || positions.isEmpty() || positions.size() > 2) {
-                throw new BusinessException(
-                        ErrorCode.VALIDATION_ERROR,
-                        "직군은 최대 2개까지만 선택할 수 있습니다."
-                );
-            }
-
-            projectMember.updateProjectPosition(positions);
-        }
-
         Review savedReview = reviewRepository.save(reviewReqDto.toEntity(reviewer, reviewee, project));
 
         // 태그 목록 저장
