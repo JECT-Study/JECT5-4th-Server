@@ -25,7 +25,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
-@SwaggerApiResTemplate
 @Tag(name = "Project Member API", description = "프로젝트 멤버 관련 API")
 public class ProjectMemberController {
 
