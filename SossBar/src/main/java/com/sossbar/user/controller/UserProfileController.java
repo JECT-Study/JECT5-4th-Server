@@ -20,7 +20,6 @@ import java.security.Principal;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
-@SwaggerApiResTemplate
 @Tag(name = "User Profile API", description = "사용자 프로필 관련 API")
 public class UserProfileController {
 

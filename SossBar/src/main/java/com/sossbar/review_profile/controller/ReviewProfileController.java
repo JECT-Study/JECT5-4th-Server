@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Review Profile API", description = "내 프로필 후기 관련 API")
 @RestController
 @RequiredArgsConstructor
-@SwaggerApiResTemplate
 @RequestMapping("/api/v1/reviews")
 public class ReviewProfileController {
 
