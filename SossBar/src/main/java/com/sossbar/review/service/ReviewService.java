@@ -24,7 +24,6 @@ import com.sossbar.spectrumaxis.repository.SpectrumAxisRepository;
 import com.sossbar.tag.entity.Tag;
 import com.sossbar.tag.repository.TagRepository;
 import com.sossbar.user.entity.User;
-import com.sossbar.user.entity.UserPosition;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -78,13 +77,6 @@ public class ReviewService {
                     reason.name()
             );
         }
-
-        // 프로젝트 멤버 조회
-        ProjectMember projectMember = projectMemberRepository.findByProjectAndUser(project, reviewer)
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
-                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
-                ));
 
         Review savedReview = reviewRepository.save(reviewReqDto.toEntity(reviewer, reviewee, project));
 
